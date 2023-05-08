@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Checkout</title>
+    <link href="css/bootstrap.css" rel="stylesheet" type="text/css" media="all"/>
+    <!--theme style-->
+    <link href="css/style.css" rel="stylesheet" type="text/css" media="all"/>
+    <script src="js/jquery.min.js"></script>
+
+
+    <!--//theme-style-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <!-- start menu -->
+    <link href="css/memenu.css" rel="stylesheet" type="text/css" media="all"/>
+    <script src="js/constant.js"></script>
+</head>
+<body>
+<!-- header -->
+<div class="header-top">
+    <div class="header-bottom">
+        <!---->
+        <div class="top-nav" style="margin-left: 20%">
+            <ul class="memenu skyblue">
+                <li class=""><a href="index.html">Home</a></li>
+                </li>
+                <li class="grid"><a href="product.html">product</a>
+                </li>
+                <li class="grid active"><a href="checkout.html">Cart</a></li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+        <!---->
+        <div class="cart box_1">
+            <p><a href="login.html" class="simpleCart_empty" id="userinfo">login</a></p>
+            <p><a href="#" class="simpleCart_empty" id="logout" style="display: none" onclick="logoutU()">logout</a></p>
+            <div class="clearfix"></div>
+        </div>
+        <div class="clearfix"></div>
+        <!---->
+    </div>
+    <div class="clearfix"></div>
+</div>
+
+<!-- check out -->
+<div class="container">
+    <div class="check-sec">
+        <div class="col-md-9 cart-items" id="cartS">
+
+        </div>
+        <div class="col-md-3 cart-total">
+            <a class="continue" href="product.html">Continue to basket</a>
+            <div class="price-details">
+                <h3>Countdown</h3>
+                <span>Total</span>
+                <span class="total1"></span>
+            </div>
+            <br>
+            <div class="price-details">
+                <h3>Pak'nSave</h3>
+                <span>Total</span>
+                <span class="total2"></span>
+            </div>
+            <div class="price-details">
+                <h3>New World</h3>
+                <span>Total</span>
+                <span class="total3"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- //check out -->
+<!---->
+<!---->
+<div class="copywrite">
+    <div class="container">
+        <div class="copy">
+            <p>Copyright &copy; 2023.Company name All rights reserved.<a target="_blank" href=""></a></p>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+</div>
+<script>
+    var aT = bT = cT = 0
+    $(function () {
+        isToken();
+
+        function isToken() {
+            if (token != '') {
+                $("#userinfo").html("account:" + localStorage.getItem('email'))
+                $("#logout").css('display', 'block')
+            }
+        }
+
+
+        postAjax(API_URL + "/action/Cart.php?action=getAll", {user_id: token}, function (data) {
+            var data = data.data;
+            var aa = '';
+            $.each(data, function (i, dom) {
+                    aa += '<div class="cart-header">\n' +
+                        '                <div class="close1" onclick="closeAA('+ i +')"></div>\n' +
+                        '                <div class="cart-sec simpleCart_shelfItem">\n' +
+                        '                    <div class="cart-item cyc">\n' +
+                        '                        <img src="' + dom['cover'] + '" class="img-responsive" alt=""/>\n' +
+                        '                    </div>\n' +
+                        '                    <div class="cart-item-info">\n' +
+                        '                        <h3><a href="single.html">' + dom['name'] + '</a></h3>\n';
+                    $.each(dom['supermarket'], function (i11, dom11) {
+                        switch (i11) {
+                            case 0:
+                                at1 = parseFloat(dom11['price']) * dom['supermarket'][0]['count'];
+                                aT += at1;
+                                break;
+                            case 1:
+                                bt1 = parseFloat(dom11['price']) * dom['supermarket'][0]['count'];
+                                bT+= bt1;
+                                break;
+                            case 2:
+                                ct1 = parseFloat(dom11['price']) * dom['supermarket'][0]['count'];
+                                cT+= ct1;
+                                break;
+                        }
+                        aa += '                        <ul class="qty">\n' +
+                            '                            <li><p>'+ dom11['name'] +'</p></li>\n' +
+                            '                            <li><p>'+ dom11['price'] +'</p></li>\n' +
+                            '                        </ul>\n';
+
+
+                    })
+
+                aa += '<div class="row">\n' +
+                    '   <div class="col-lg-4">\n' +
+                    '       <div class="input-group">\n' +
+                    '           <span class="input-group-btn">\n' +
+                    '           <button class="btn btn-default" type="button" id="Minus">-</button>\n' +
+                    '           </span>\n' +
+                    '           <input type="text" class="form-control" id="catCount" value="'+ dom['supermarket'][0]['count'] +'"  data-id="'+ i +'">' +
+                    '           <span class="input-group-btn">\n' +
+                    '           <button class="btn btn-default" type="button" id="Added">+</button>\n' +
+                    '           </span>\n' +
+                    '       </div>' +
+                    '   </div>\n' +
+                    ' </div>';
+                    aa += '                    </div>\n' +
+                        '                    <div class="clearfix"></div>\n' +
+                        '\n' +
+                        '                </div>\n' +
+                        '            </div>';
+            })
+            aa = '<h1>My Shopping Bag</h1>' + aa;
+            $("#cartS").html(aa)
+            $(".total1").html(aT.toFixed(2))
+            $(".total2").html(bT.toFixed(2))
+            $(".total3").html(cT.toFixed(2))
+
+        }, {
+            errorFunction: errorFunction,
+            type: "get",
+        });
+
+        $(document).on('click', '#Minus', function () {
+            var catCount = $(this).parent().siblings("#catCount");
+            var id = $(this).parent().siblings("#catCount").data('id');
+            catCountVal =  parseInt(catCount.val());
+            if (catCountVal == 1) {
+                return true;
+            }
+
+            catCountVal -= 1;
+
+            postAjax(API_URL + "/action/Cart.php?action=countU&act=2", {user_id:token,id:id}, function (data) {
+                alert(data.msg);
+                catCount.val(catCountVal);
+                window.location.href = 'checkout.html';
+            }, {
+                errorFunction:errorFunction,
+            });
+        })
+
+
+        $(document).on('click', '#Added', function () {
+            var catCount = $(this).parent().siblings("#catCount");
+            var id = $(this).parent().siblings("#catCount").data('id');
+            catCountVal =  parseInt(catCount.val());
+            if (catCountVal == 10) {
+                alert('The maximum amount of 10')
+                return true;
+            }
+
+            catCountVal = catCountVal + 1;
+            console.log(catCountVal)
+
+            postAjax(API_URL + "/action/Cart.php?action=countU&act=1", {user_id:token,id:id}, function (data) {
+                alert(data.msg);
+                catCount.val(catCountVal);
+                window.location.href = 'checkout.html';
+            }, {
+                errorFunction:errorFunction,
+            });
+        })
+    })
+
+    function closeAA(id) {
+        postAjax(API_URL + "/action/Cart.php?action=delCart", {user_id:token,id:id}, function (data) {
+            alert(data.msg);
+            window.location.href = 'checkout.html';
+        }, {
+            errorFunction:errorFunction,
+        });
+    }
+</script>
+<!---->
+</body>
+</html>
