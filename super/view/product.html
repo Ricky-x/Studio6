@@ -52,14 +52,31 @@
             <li><a href="index.html">Home</a></li>
             <li class="active">Products</li>
         </ol>
-        <div class="input-group mb-3">
+        <h2>Our Products</h2>
+        <div class="row">
+            <div class="col-md-7">
+            </div>
+            <div class="col-md-3">
                 <input type="text" class="form-control" id="keyWord" aria-describedby="button-addon3">
+            </div>
+            <div class="col-md-2">
                 <button class="btn btn-outline-secondary" onclick="search()" type="button">search</button>
+            </div>
         </div>
 
-        <h2>Our Products</h2>
-        <div class="col-md-12 product-model-sec" id="listA">
-
+        <div class="col-md-12 product-model-sec">
+            <div class="col-md-3" id="listR">
+                <ul class="list-group">
+                    <li class="list-group-item active">types of</li>
+                    <li class="list-group-item types"><input type="radio" name="types" value="all">  all </li>
+                    <li class="list-group-item types"><input type="radio" name="types" value="meat">  meat </li>
+                    <li class="list-group-item types"><input type="radio"  name="types" value="Fruits"> Fruits and vegetables </li>
+                    <li class="list-group-item types"><input type="radio"  name="types" value="Health"> Health & Body </li>
+                    <li class="list-group-item types"><input type="radio"  name="types" value="Drinks"> Drinks </li>
+                </ul>
+            </div>
+            <div class="col-md-9" id="listA">
+            </div>
         </div>
 
     </div>
@@ -77,6 +94,7 @@
 </div>
 
 <script>
+    var types = '';
     $(function () {
 
         isToken();
@@ -87,19 +105,26 @@
                 $("#logout").css('display', 'block')
             }
         }
+
+        $(".types").click(function(){
+            $(this).children('input').attr('checked', 'checked')
+             types = $(this).children('input').val();
+            search(2)
+        });
+
         postAjax(API_URL + "/action/Lists.php?action=getAll", {}, function (data) {
             var data = data.data;
             var aa = '';
             $.each(data, function (i, dom) {
-                aa+= '        \n' +
-                 <!--   ' <div class="col-md-3"> \n' + -->
-                    '            <a href="single.html?id='+ dom['id'] +'">\n' +
+                aa += '        \n' +
+                    <!--   ' <div class="col-md-3"> \n' + -->
+                    '            <a href="single.html?id=' + dom['id'] + '">\n' +
                     '                <div class="product-grid">\n' +
                     '                    <div class="product-img b-link-stripe b-animate-go  thickbox">\n' +
-                    '                        <img src="'+ dom['cover'] +'" class="img-responsive" alt="">\n' +
+                    '                        <img src="' + dom['cover'] + '" class="img-responsive" alt="">\n' +
                     '                    </div>\n' +
                     '                    <div class="product-info-cust prt_name">\n' +
-                    '                        <span class="item_price">' + dom['name'] +'</span>\n' +
+                    '                        <span class="item_price">' + dom['name'] + '</span>\n' +
                     '                    </div>\n' +
                     '                </div>\n' +
                     '            </a>\n';
@@ -109,30 +134,26 @@
             $("#listA").html(aa)
 
         }, {
-            errorFunction:errorFunction,
+            errorFunction: errorFunction,
             type: "get",
         });
     })
-    
-    function search() {
-        var keyword = $("#keyWord").val();
-        if (keyword == '') {
-            alert('Cannot be empty');
-            return;
-        }
 
-        postAjax(API_URL + "/action/Lists.php?action=seacher", {word:keyword}, function (data) {
+    function search(type = 1) {
+        var keyword = $("#keyWord").val();
+
+        postAjax(API_URL + "/action/Lists.php?action=seacher", {word: keyword, type: type, types: types}, function (data) {
             var data = data.data;
             var aa = '';
             $.each(data, function (i, dom) {
-                aa+= '        \n' +
-                    '            <a href="single.html?id='+ dom['id'] +'">\n' +
+                aa += '        \n' +
+                    '            <a href="single.html?id=' + dom['id'] + '">\n' +
                     '                <div class="product-grid">\n' +
                     '                    <div class="product-img b-link-stripe b-animate-go  thickbox">\n' +
-                    '                        <img src="'+ dom['cover'] +'" class="img-responsive" alt="">\n' +
+                    '                        <img src="' + dom['cover'] + '" class="img-responsive" alt="">\n' +
                     '                    </div>\n' +
                     '                    <div class="product-info-cust prt_name">\n' +
-                    '                        <span class="item_price">' + dom['name'] +'</span>\n' +
+                    '                        <span class="item_price">' + dom['name'] + '</span>\n' +
                     '                    </div>\n' +
                     '                </div>\n' +
                     '            </a>\n';
@@ -141,9 +162,13 @@
             $("#listA").html(aa)
 
         }, {
-            errorFunction:errorFunction,
+            errorFunction: errorFunction,
             type: "get",
         });
+    }
+    function logoutU() {
+        localStorage.setItem('user_id', '');
+        window.location.href = 'index.html';
     }
 </script>
 <!---->

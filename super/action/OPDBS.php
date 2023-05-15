@@ -67,7 +67,7 @@ class OPDBS{
         while ($row = mysqli_fetch_assoc($result)){
             $list[] = $row;
         }
-        return $list[0];
+        return $list[0] ?? '';
     }
 
     public function close() {

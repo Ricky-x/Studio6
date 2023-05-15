@@ -15,11 +15,27 @@ class Lists extends \Base
     public function seacher()
     {
         $word = $_GET['word'] ?? '';
+        $types = empty($_GET['types']) ? 'all' : $_GET['types'];
+
+        $whereW = $whereT = '';
         if ($word != '') {
-            $listDATA = $this->DB->getAll("select * from products where name like '%{$word}%'");
-            return sendSuccess('get success', $listDATA);
+            $whereW = "name like '%{$word}%'";
         }
-        return sendSuccess('Please enter a keyword', [], 400);
+        if ($types != 'all') {
+            $whereT = "types = '{$types}'";
+        }
+        if ($whereT != '' && $whereW != '') {
+            $listDATA = $this->DB->getAll("select * from products where {$whereT} and {$whereW}");
+        } else if ($whereT != '') {
+            $listDATA = $this->DB->getAll("select * from products where {$whereT}");
+        } else if ($whereW != '') {
+            $listDATA = $this->DB->getAll("select * from products where {$whereW}");
+        } else {
+            $listDATA = $this->DB->getAll("select * from products");
+        }
+
+        return sendSuccess('get success', $listDATA);
+
 
     }
 }
@@ -30,5 +46,5 @@ if ($action == '') {
     echo sendSuccess('Can not be empty', [], 400);
     die;
 }
-$login  = new Lists();
+$login = new Lists();
 echo $login->$action();
